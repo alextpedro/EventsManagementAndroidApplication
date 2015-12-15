@@ -1,14 +1,15 @@
 <resources>
-    <string name="app_name">Events Management</string>
-    <string name="title_activity_login">Log In</string>
-
-    <!-- Strings related to login -->
+    <string name="app_name">EventsManagementAPP</string>
     <string name="prompt_username">Username</string>
-    <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_signin_short">Signin</string>
+    <string name="action_signin">Sign In</string>
+    <string name="title_activity_destroyed">Sign in</string>
+    <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_username">This username is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="app_label">Events Management</string>
 </resources>
