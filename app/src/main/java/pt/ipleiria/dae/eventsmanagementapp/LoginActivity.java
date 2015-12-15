@@ -1,6 +1,7 @@
 package pt.ipleiria.dae.eventsmanagementapp;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -163,7 +164,11 @@ public class LoginActivity extends Activity {
             mAuthTask = null;
 
             if (success) {
-                finish();
+                //finish();
+                Intent i = new Intent(LoginActivity.this, ListEventsActivity.class);
+                i.putExtra("username", mUsername);
+                i.putExtra("password", mPassword);
+                startActivity(i);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
