@@ -2,9 +2,7 @@ package pt.ipleiria.dae.eventsmanagementapp;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,24 +10,29 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 
 /**
  * A login screen that offers login via username/password.
  */
 public class LoginActivity extends Activity {
-    private static final String[] DUMMY_CREDENTIALS = new String[]
-            {
-                    "myaccount1@gmail.com:12345"
-            };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
+    private static final String WEB_SERVICE_URI = "http://localhost.com:8080/EventsManagement_RESTWS/webapi";
 
     // UI references.
     private EditText mUsernameView;
     private EditText mPasswordView;
-    private View mLoginFormView;
+    private Client client;
+    private HttpAuthenticationFeature feature;
+    protected View mLoginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +62,8 @@ public class LoginActivity extends Activity {
         });
 
         mLoginFormView = findViewById(R.id.user_login_form);
+        client = ClientBuilder.newClient();
+        feature = null;
     }
 
     /**
@@ -67,10 +72,6 @@ public class LoginActivity extends Activity {
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);
@@ -82,103 +83,37 @@ public class LoginActivity extends Activity {
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        feature = HttpAuthenticationFeature.basic(username, password);
+        client.register(feature);
+        //TODO: Search jersey Response
+        Response returnedEvents = null;
+
+        try {
+            returnedEvents = client.target(WEB_SERVICE_URI)
+                    .path("/attendants/all_attendant_events")
+                    .request(MediaType.APPLICATION_XML)
+                    .get();
+
+            if (returnedEvents == null) {
+                Toast.makeText(LoginActivity.this, R.string.string_events_unavailable, Toast.LENGTH_SHORT).show();
+                cancel = true;
+            }
+        } catch (Exception e) {
+            //TODO: FInd out what to do with an exception on Android.
             cancel = true;
         }
 
-        // Check for a valid username.
-        if (TextUtils.isEmpty(username)) {
-            mUsernameView.setError(getString(R.string.error_field_required));
-            focusView = mUsernameView;
-            cancel = true;
-        } else if (!isUsernameValid(username)) {
-            mUsernameView.setError(getString(R.string.error_invalid_username));
-            focusView = mUsernameView;
-            cancel = true;
-        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            mAuthTask = new UserLoginTask(username, password);
-            mAuthTask.execute((Void) null);
+            Intent i = new Intent(LoginActivity.this, ListEventsActivity.class);
+            //i.putExtra("returnedEvents", returnedEvents);
+            startActivity(i);
         }
     }
 
-    private boolean isUsernameValid(String username) {
-        //TODO: Replace this with your own logic
-        return true;
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return true;
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mUsername;
-        private final String mPassword;
-
-        UserLoginTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mUsername)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-
-            if (success) {
-                //finish();
-                Intent i = new Intent(LoginActivity.this, ListEventsActivity.class);
-                i.putExtra("username", mUsername);
-                i.putExtra("password", mPassword);
-                startActivity(i);
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-        }
-    }
 }
 
