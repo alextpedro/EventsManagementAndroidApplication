@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
@@ -81,7 +80,6 @@ public class LoginActivity extends Activity {
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
-        View focusView = null;
 
         feature = HttpAuthenticationFeature.basic(username, password);
         client.register(feature);
@@ -99,15 +97,15 @@ public class LoginActivity extends Activity {
                 cancel = true;
             }
         } catch (Exception e) {
-            //TODO: FInd out what to do with an exception on Android.
             cancel = true;
+            Toast.makeText(LoginActivity.this, "There has been an error: " + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
 
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
-            focusView.requestFocus();
+            //focusView.requestFocus();
         } else {
             Intent i = new Intent(LoginActivity.this, ListEventsActivity.class);
             //i.putExtra("returnedEvents", returnedEvents);
